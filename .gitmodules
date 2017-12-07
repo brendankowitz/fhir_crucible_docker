@@ -1,0 +1,3 @@
+[submodule "plan_executor"]
+	path = plan_executor
+	url = ../plan_executor.git
