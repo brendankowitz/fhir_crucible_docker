@@ -121,6 +121,7 @@ echo "" >> /etc/init.d/delayed-job && \
 echo 'case "$1" in' >> /etc/init.d/delayed-job && \
 echo "    start)" >> /etc/init.d/delayed-job && \
 echo "      cd /data/crucible" >> /etc/init.d/delayed-job && \
+echo "      su root -c 'service apache2 start'" >> /etc/init.d/delayed-job && \
 echo "      su root -c 'mongod --fork --syslog'" >> /etc/init.d/delayed-job && \
 echo "      su root -c 'export PATH=$PATH:/usr/local/bin/ruby ; RAILS_ENV=production bin/delayed_job -n3 start'" >> /etc/init.d/delayed-job && \
 echo "      RETVAL=$?" >> /etc/init.d/delayed-job && \
@@ -152,10 +153,9 @@ echo "exit $RETVAL" >> /etc/init.d/delayed-job
 
 RUN chmod a+x /etc/init.d/delayed-job && update-rc.d delayed-job defaults
 
-RUN /etc/init.d/delayed-job start
-
 # Define default command.
-CMD ["mongod"]
+
+CMD ["/etc/init.d/delayed-job", "start"]
 
 # Expose ports.
 #   - 27017: process
