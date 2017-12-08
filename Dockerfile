@@ -83,6 +83,9 @@ bower install --allow-root
 
 VOLUME ["/data/crucible/public"]
 
+RUN sed -i 's/config\.force_ssl\ \=\ true/config\.force_ssl\ \=\ false/g' /data/crucible/config/environments/production.rb && \
+tail -100 /data/crucible/config/environments/production.rb
+
 RUN mongod --fork --syslog && \
 cd /data/crucible && bundle exec rake assets:precompile RAILS_ENV=production
 
