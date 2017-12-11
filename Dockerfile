@@ -43,8 +43,8 @@ RUN sed -i 's/localhost\:27017/db\:27017/g' /home/app/crucible/config/mongoid.ym
 RUN echo "" >> /home/app/crucible/log/production.log
 RUN echo "" >> /home/app/crucible/log/delayed_job.log
 
-# RUN cd /home/app/crucible/ && chmod -R 777 *
-RUN cd /home/app/crucible/ && chmod -R 755 *
+RUN chown -R app:app /home/app/crucible
+RUN cd /home/app/crucible/log && chmod -R 755 *
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*  
