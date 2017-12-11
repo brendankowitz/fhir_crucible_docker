@@ -36,7 +36,11 @@ bundle update --local
 
 RUN sed -i 's/config\.force_ssl\ \=\ true/config\.force_ssl\ \=\ false/g' /home/app/crucible/config/environments/production.rb
 
-RUN sed -i 's/secret_key_base\:\ \<\%\=\ ENV\[\"SECRET\_KEY\_BASE\"\]\ \%\>/secret_key_base\:\ 474aab81ebc3a7f32ac02b97ffc2d149c1133ca5c5bb291dcdf35c7fcacd6822f916df7459c8d331279341760d42b23375d66245ababc464d12cf6bae0347c52/g' /home/app/crucible/config/secrets.yml
+
+RUN cd /home/app/crucible && \
+SECRET=$(rake secret | tail -1) && \
+head -n -1 /home/app/crucible/config/secrets.yml > /home/app/crucible/config/tmp.secrets.yml ; mv /home/app/crucible/config/tmp.secrets.yml /home/app/crucible/config/secrets.yml && \
+echo "  secret_key_base: $SECRET" >> /home/app/crucible/config/secrets.yml
 
 RUN sed -i 's/localhost\:27017/db\:27017/g' /home/app/crucible/config/mongoid.yml
 
