@@ -21,11 +21,7 @@ RUN apt-get update \
  && apt-get install -y nodejs \ 
  && apt-get install -y npm \ 
  && apt-get install -y git \ 
- && npm install bower -g \ 
- && ln -s /usr/bin/nodejs /usr/bin/node
-
-# Prepare folders
-RUN mkdir /home/app
+ && npm install bower -g
 
 # Crucible Sourcecode
 RUN cd /home/app && \
@@ -34,19 +30,11 @@ cd crucible && \
 bundle install && \ 
 bower install --allow-root
 
-RUN sed -i 's/config\.force_ssl\ \=\ true/config\.force_ssl\ \=\ false/g' /data/crucible/config/environments/production.rb && \
+RUN sed -i 's/config\.force_ssl\ \=\ true/config\.force_ssl\ \=\ false/g' /home/app/crucible/config/environments/production.rb
 
-RUN sed -i 's/secret_key_base\:\ \<\%\=\ ENV\[\"SECRET\_KEY\_BASE\"\]\ \%\>/secret_key_base\:\ 474aab81ebc3a7f32ac02b97ffc2d149c1133ca5c5bb291dcdf35c7fcacd6822f916df7459c8d331279341760d42b23375d66245ababc464d12cf6bae0347c52/g' /data/crucible/config/secrets.yml
+RUN sed -i 's/secret_key_base\:\ \<\%\=\ ENV\[\"SECRET\_KEY\_BASE\"\]\ \%\>/secret_key_base\:\ 474aab81ebc3a7f32ac02b97ffc2d149c1133ca5c5bb291dcdf35c7fcacd6822f916df7459c8d331279341760d42b23375d66245ababc464d12cf6bae0347c52/g' /home/app/crucible/config/secrets.yml
 
-RUN mongod --fork --syslog && \
-cd /data/crucible && bundle exec rake assets:precompile RAILS_ENV=production
-
-# Install MongoDB.
-RUN \
-  apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 && \
-  echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' > /etc/apt/sources.list.d/mongodb.list && \
-  apt-get update && \
-  apt-get install -y mongodb-org
+RUN chmod -R 755 /home/app/crucible
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*  
