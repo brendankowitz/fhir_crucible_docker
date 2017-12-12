@@ -41,6 +41,7 @@ head -n -1 /home/app/crucible/config/secrets.yml > /home/app/crucible/config/tmp
 echo "  secret_key_base: $SECRET" >> /home/app/crucible/config/secrets.yml
 
 # Change connection string to connect to Mongo container
+# ** NOTE: This line should be removed to host in Azure Container instance
 RUN sed -i 's/localhost\:27017/db\:27017/g' /home/app/crucible/config/mongoid.yml
 
 # Create log files
