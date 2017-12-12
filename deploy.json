@@ -1,0 +1,91 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+		"imageRegistryLoginServer": {
+            "type": "String",
+            "defaultValue": ""
+        },
+        "imageUsername": {
+            "type": "String",
+            "defaultValue": ""
+        },
+        "imagePassword": {
+            "type": "secureString",
+            "defaultValue": ""
+        }
+  },
+  "variables": {
+    "container1name": "web",
+    "container1image": "crucibledocker.azurecr.io/fhircrucibledocker:aci",
+    "container2name": "db",
+    "container2image": "mongo:3.0",
+	"imageRegistryLoginServer": "[parameters('imageRegistryLoginServer')]",
+    "imageUsername": "[parameters('imageUsername')]",
+    "imagePassword": "[parameters('imagePassword')]"
+  },
+    "resources": [
+      {
+        "name": "fhircrucibledockergroup",
+        "type": "Microsoft.ContainerInstance/containerGroups",
+        "apiVersion": "2017-08-01-preview",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "containers": [
+            {
+              "name": "[variables('container1name')]",
+              "properties": {
+                "image": "[variables('container1image')]",
+                "resources": {
+                  "requests": {
+                    "cpu": 1,
+                    "memoryInGb": 1.5
+                    }
+                },
+                "ports": [
+                  {
+                    "port": 80
+                  }
+                ]
+              }
+            },
+            {
+              "name": "[variables('container2name')]",
+              "properties": {
+                "image": "[variables('container2image')]",
+                "resources": {
+                  "requests": {
+                    "cpu": 1,
+                    "memoryInGb": 1.5
+                    }
+                }
+              }
+            }
+          ],
+          "osType": "Linux",
+          "ipAddress": {
+            "type": "Public",
+            "ports": [
+              {
+                "protocol": "tcp",
+                "port": "80"
+              }
+            ]
+          },
+		  "imageRegistryCredentials": [
+				{
+					"server": "[parameters('imageRegistryLoginServer')]",
+					"username": "[parameters('imageUsername')]",
+					"password": "[parameters('imagePassword')]"
+				}
+			]
+        }
+      }
+    ],
+    "outputs": {
+      "containerIPv4Address": {
+        "type": "string",
+        "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups/', 'fhircrucibledockergroup')).ipAddress.ip]"
+      }
+    }
+  }
