@@ -17,7 +17,7 @@
   },
   "variables": {
     "container1name": "web",
-    "container1image": "crucibledocker.azurecr.io/fhircrucibledocker:aci",
+    "container1image": "resolute.azurecr.io/fhircrucibledocker:aci",
     "container2name": "db",
     "container2image": "mongo:3.0",
 	"imageRegistryLoginServer": "[parameters('imageRegistryLoginServer')]",
