@@ -18,8 +18,6 @@
   "variables": {
     "container1name": "web",
     "container1image": "resolute.azurecr.io/fhircrucibledocker:aci",
-    "container2name": "db",
-    "container2image": "mongo:3.0",
 	"imageRegistryLoginServer": "[parameters('imageRegistryLoginServer')]",
     "imageUsername": "[parameters('imageUsername')]",
     "imagePassword": "[parameters('imagePassword')]"
@@ -47,18 +45,6 @@
                     "port": 80
                   }
                 ]
-              }
-            },
-            {
-              "name": "[variables('container2name')]",
-              "properties": {
-                "image": "[variables('container2image')]",
-                "resources": {
-                  "requests": {
-                    "cpu": 2,
-                    "memoryInGb": 3.5
-                    }
-                }
               }
             }
           ],
