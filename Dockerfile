@@ -20,13 +20,16 @@ RUN apt-get update \
  && apt-get install -y npm \ 
  && apt-get install -y git \ 
  && apt-get install -y tzdata \
+ && apt-get install -y dos2unix \
  && npm install bower -g
 
 # Crucible Sourcecode
+ADD fhir-crucible.git/ /home/app/crucible/
+
 RUN cd /home/app && \
-git clone https://github.com/fhir-crucible/crucible.git && \
 cd crucible && \ 
 gem install tzinfo-data && \
+gem install bundler && \
 bundle install && \ 
 bower install --allow-root && \
 bundle update --local
@@ -40,10 +43,6 @@ SECRET=$(rake secret | tail -1) && \
 head -n -1 /home/app/crucible/config/secrets.yml > /home/app/crucible/config/tmp.secrets.yml ; mv /home/app/crucible/config/tmp.secrets.yml /home/app/crucible/config/secrets.yml && \
 echo "  secret_key_base: $SECRET" >> /home/app/crucible/config/secrets.yml
 
-# Change connection string to connect to Mongo container
-# ** NOTE: This line should be removed to host in Azure Container instance
-RUN sed -i 's/localhost\:27017/db\:27017/g' /home/app/crucible/config/mongoid.yml
-
 # Create log files
 RUN echo "" >> /home/app/crucible/log/production.log
 RUN echo "" >> /home/app/crucible/log/delayed_job.log
@@ -52,11 +51,28 @@ RUN echo "" >> /home/app/crucible/log/delayed_job.log
 RUN chown -R app:app /home/app/crucible
 RUN cd /home/app/crucible/log && chmod -R 755 *
 
-# Clean up APT when done.
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*  
-
 # Add and set startup scripts
 ADD Startup.sh /home/app/
 RUN chmod a+x /home/app/Startup.sh
 
+RUN cd /home/app/ && find ./ -type f -exec dos2unix {} \;
+
+# Edit db
+RUN head -n -2 /home/app/crucible/config/mongoid.yml > /home/app/crucible/config/tmp.mongoid.yml ; mv /home/app/crucible/config/tmp.mongoid.yml /home/app/crucible/config/mongoid.yml && \
+echo "      hosts:" >> /home/app/crucible/config/mongoid.yml && \
+echo "        - localhost:27017" >> /home/app/crucible/config/mongoid.yml
+
+RUN cd /home/app/crucible && \
+RAILS_ENV=production rake assets:precompile
+
+# Edit db
+RUN head -n -2 /home/app/crucible/config/mongoid.yml > /home/app/crucible/config/tmp.mongoid.yml ; mv /home/app/crucible/config/tmp.mongoid.yml /home/app/crucible/config/mongoid.yml && \
+echo "      hosts:" >> /home/app/crucible/config/mongoid.yml && \
+echo "        - db:27017" >> /home/app/crucible/config/mongoid.yml
+
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*  
+
 CMD ["/home/app/Startup.sh"]
+
+EXPOSE 80
